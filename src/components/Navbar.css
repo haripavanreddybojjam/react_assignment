@@ -9,13 +9,14 @@
   
   .navbar-brand h2 {
     margin: 0;
-    margin-right: 40px;
+    margin-right: 80px;
+    margin-left: 40px;
   }
   
   .navbar-links {
     list-style-type: none;
     display: flex;
-    gap: 40px;
+    gap: 80px;
   }
   
   .navbar-links li {
@@ -25,9 +26,56 @@
   .navbar-links a {
     color: white;
     text-decoration: none;
+    font-weight: bold;
+    transition: transform 0.2s; 
+    display: inline-block;
   }
   
   .navbar-links a:hover {
-    text-decoration: underline;
+    transform: scale(1.2);
+  }
+
+  .cart-container {
+    position: relative;
+    margin-left: auto;
+  }
+  
+  .cart-icon-wrapper {
+    position: relative;
+    display: inline-block;
+    color: white;
+  
+  }
+  
+  .cart-notification {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    width: 10px;
+    height: 10px;
+    background-color: red;
+    border-radius: 50%;
+    border: 1px solid white;
+  }.cart-container {
+    position: relative;
+    margin-left: auto;
+  }
+  
+  .cart-icon-wrapper {
+    position: relative;
+    display: inline-block;
+    color: white;
+  
+  }
+  
+  .cart-notification {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    width: 10px;
+    height: 10px;
+    background-color: red;
+    border-radius: 50%;
+    border: 1px solid white;
   }
   

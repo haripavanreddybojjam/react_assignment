@@ -1,8 +1,10 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import './Navbar.css';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faShoppingCart } from '@fortawesome/free-solid-svg-icons';
 
-function Navbar() {
+function Navbar({cart}) {
   return (
     <nav className="navbar">
       <div className="navbar-brand">
@@ -13,12 +15,17 @@ function Navbar() {
           <Link to="/">Home</Link>
         </li>
         <li>
-          <Link to="/cart">Cart</Link>
-        </li>
-        <li>
           <Link to="/wishlist">Wishlist</Link>
         </li>
       </ul>
+      <div className="cart-container">
+        <Link to="/cart">
+          <div className="cart-icon-wrapper">
+            <FontAwesomeIcon icon={faShoppingCart} size="2x" />
+            {cart.length > 0 && <span className="cart-notification"></span>}
+          </div>
+        </Link>
+      </div>
     </nav>
   );
 }

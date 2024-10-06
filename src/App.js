@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState,useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import ProductList from './components/ProductList';
@@ -7,8 +7,21 @@ import Cart from './components/Cart';
 import Wishlist from './components/Wishlist';
 
 function App() {
-  const [cart, setCart] = useState([]);
-  const [wishlist, setWishlist] = useState([]);
+  const [cart, setCart] = useState(() => {
+    const savedCart = localStorage.getItem('cart');
+    return savedCart ? JSON.parse(savedCart) : [];
+  });
+  const [wishlist, setWishlist] = useState(() => {
+    const savedWishlist = localStorage.getItem('wishlist');
+    return savedWishlist ? JSON.parse(savedWishlist) : [];
+  });
+  useEffect(() => {
+    localStorage.setItem('cart', JSON.stringify(cart));
+  }, [cart]);
+
+  useEffect(() => {
+    localStorage.setItem('wishlist', JSON.stringify(wishlist));
+  }, [wishlist]);
 
   const addToCart = (product) => {
     const existingProduct = cart.find(item => item.id === product.id);
@@ -40,7 +53,7 @@ function App() {
   return (
     <Router>
       <div className="App">
-      <Navbar />
+      <Navbar cart = {cart}/>
         <Routes>
           <Route path="/" element={<ProductList />} />
           <Route 
