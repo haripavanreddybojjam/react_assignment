@@ -1,20 +1,21 @@
 .navbar {
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-start;
     align-items: center;
-    background-color: #333;
+    background-color: #ac8e8e;
     padding: 10px;
     color: white;
   }
   
   .navbar-brand h2 {
     margin: 0;
+    margin-right: 40px;
   }
   
   .navbar-links {
     list-style-type: none;
     display: flex;
-    gap: 20px;
+    gap: 40px;
   }
   
   .navbar-links li {

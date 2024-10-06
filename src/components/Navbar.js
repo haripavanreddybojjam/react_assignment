@@ -10,7 +10,7 @@ function Navbar() {
       </div>
       <ul className="navbar-links">
         <li>
-          <Link to="/">Products</Link>
+          <Link to="/">Home</Link>
         </li>
         <li>
           <Link to="/cart">Cart</Link>
