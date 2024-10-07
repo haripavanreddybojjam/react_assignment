@@ -2,14 +2,20 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import productData from '../data/productData.json';
 import './ProductList.css';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faHeart as regularHeart } from '@fortawesome/free-regular-svg-icons';
+import { faHeart as solidHeart } from '@fortawesome/free-solid-svg-icons';
 
-function ProductList() {
+function ProductList({addToCart, updateCartQuantity, addToWishlist, cart, wishlist, setWishlist, searchTerm }) {
   const [products, setProducts] = useState([]);
-  const [searchTerm, setSearchTerm] = useState('');
   const [minPrice, setMinPrice] = useState('');  
   const [maxPrice, setMaxPrice] = useState('');  
   const [currentPage, setCurrentPage] = useState(1);
   const productsPerPage = 6;
+  const removeFromWishlist = (id) => {
+    setWishlist(wishlist.filter(item => item.id !== id));
+  };
+  const [wishlistToggle, setWishlistToggle] = useState({});
 
   useEffect(() => {
     setProducts(productData);
@@ -23,17 +29,32 @@ function ProductList() {
     const value = e.target.value;
     setMaxPrice(value === '' ? '' : Math.max(0, Number(value)));  
   };
+  const handleWishlistToggle = (product) => {
+    setWishlistToggle((prev) => ({
+      ...prev,
+      [product.id]: !prev[product.id]
+    }));
+    if (!wishlistToggle[product.id]) {
+      addToWishlist(product);
+    } else {
+      removeFromWishlist(product.id);
+    }
+  };
 
-  const filteredProducts = products.filter(product => {
-    const productMatchesSearch = product.title.toLowerCase().includes(searchTerm.toLowerCase());
-    const productMatchesPrice = product.price >= (minPrice === '' ? 0 : minPrice) &&
-                                product.price <= (maxPrice === '' ? Infinity : maxPrice);
-    return productMatchesSearch && productMatchesPrice;
-  });
+  const filterBySearchTerm = (product) => {
+    return product.title.toLowerCase().includes(searchTerm.toLowerCase());
+  };
+  const filterByPrice = (product) => {
+    return product.price >= (minPrice === '' ? 0 : minPrice) && 
+           product.price <= (maxPrice === '' ? Infinity : maxPrice);
+  };
+  const filteredProducts = products.filter(product => filterBySearchTerm(product) && filterByPrice(product));
   const indexOfLastProduct = currentPage * productsPerPage;
   const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
   const currentProducts = filteredProducts.slice(indexOfFirstProduct, indexOfLastProduct);
-
+  const isInCart = (productId) => {
+    return cart.find((item) => item.id === productId);
+  };
   const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
 
   const getPageNumbers = () => {
@@ -83,30 +104,45 @@ function ProductList() {
       </div>
     <div className="main-content">
       <h2>Products</h2>
-      <input
-          type="text"
-          placeholder="Search products..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-        />
+      
       {currentProducts.length === 0 ? (
         <p>No products available</p>
       ) : (
         <div className="product-grid">
-          {currentProducts.map(product => (
-            <div key={product.id} style={{ border: '1px solid #ddd', padding: '20px' }}>
-              <img 
-                src={product.image} 
-                alt={product.title} 
-                style={{ width: '100px', height: '100px', objectFit: 'contain' }} 
-              />
-              <h3>{product.title}</h3>
-              <p>Price: ${product.price}</p>
-              <Link to={`/product/${product.id}`}>View Details</Link>
-            </div>
-          ))}
+        {currentProducts.map(product => (
+          <div key={product.id} className="product-card">
+          <Link to={`/product/${product.id}`} key={product.id} className="product-link">
+
+            <img className='product-image'
+              src={product.image} 
+              alt={product.title} 
+            />
+          
+
+            <h3>{product.title}</h3>
+            <p>Price: ${product.price}</p>
+            </Link>
+            
+      <FontAwesomeIcon 
+        icon={wishlistToggle[product.id] ? solidHeart : regularHeart} 
+        size="2x" 
+        className={wishlistToggle[product.id] ? 'wishlist-heart active' : 'wishlist-heart'}
+        onClick={() => handleWishlistToggle(product)}
+      />
+      {isInCart(product.id) ? (
+        <div>
+          <button onClick={() => updateCartQuantity(product.id, -1)}>-</button>
+          <span>{isInCart(product.id).quantity}</span>
+          <button onClick={() => updateCartQuantity(product.id, 1)}>+</button>
         </div>
+      ) : (
+        <button onClick={() => addToCart(product)}>Add to Cart</button>
       )}
+            
+          </div>
+        ))}
+      </div>
+    )}
       <div className="pagination-container">
           <div className="current-page-info">
             <p>Page {currentPage} of {totalPages}</p>

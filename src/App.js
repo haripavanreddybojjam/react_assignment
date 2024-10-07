@@ -22,7 +22,7 @@ function App() {
   useEffect(() => {
     localStorage.setItem('wishlist', JSON.stringify(wishlist));
   }, [wishlist]);
-
+  const [searchTerm, setSearchTerm] = useState('');
   const addToCart = (product) => {
     const existingProduct = cart.find(item => item.id === product.id);
     if (existingProduct) {
@@ -53,9 +53,16 @@ function App() {
   return (
     <Router>
       <div className="App">
-      <Navbar cart = {cart}/>
+      <Navbar searchTerm={searchTerm} setSearchTerm={setSearchTerm} cart = {cart}/>
         <Routes>
-          <Route path="/" element={<ProductList />} />
+        <Route path="/" element={<ProductList 
+              addToCart={addToCart} 
+              cart={cart} 
+              updateCartQuantity={updateCartQuantity} 
+              addToWishlist={addToWishlist}
+              setWishlist={setWishlist}
+              wishlist={wishlist}
+              searchTerm={searchTerm} />} />
           <Route 
             path="/product/:id" 
             element={<ProductDetails 
@@ -64,6 +71,7 @@ function App() {
               updateCartQuantity={updateCartQuantity} 
               addToWishlist={addToWishlist}
               wishlist={wishlist} 
+              searchTerm={searchTerm}
             />} 
           />
           <Route path="/cart" element={<Cart cart={cart} setCart={setCart} addToWishlist={addToWishlist} />} />

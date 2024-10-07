@@ -78,4 +78,14 @@
     border-radius: 50%;
     border: 1px solid white;
   }
+  .search-bar{
+    margin-left: 700px;
+    
+  }
+  .search-bar input{
+    width: 200px;
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+  }
   

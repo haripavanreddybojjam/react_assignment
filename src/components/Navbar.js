@@ -4,7 +4,7 @@ import './Navbar.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faShoppingCart } from '@fortawesome/free-solid-svg-icons';
 
-function Navbar({cart}) {
+function Navbar({cart, searchTerm, setSearchTerm }) {
   return (
     <nav className="navbar">
       <div className="navbar-brand">
@@ -18,6 +18,14 @@ function Navbar({cart}) {
           <Link to="/wishlist">Wishlist</Link>
         </li>
       </ul>
+      <div className="search-bar">
+        <input
+          type="text"
+          placeholder="Search products..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+      </div>
       <div className="cart-container">
         <Link to="/cart">
           <div className="cart-icon-wrapper">
