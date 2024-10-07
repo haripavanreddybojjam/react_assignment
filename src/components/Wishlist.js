@@ -1,4 +1,5 @@
 import React from 'react';
+import './wishlist.css';
 
 function Wishlist({ wishlist, setWishlist, addToCart }) {
   const removeFromWishlist = (id) => {
