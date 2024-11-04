@@ -1,25 +1,56 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import productData from '../data/productData.json';
+import axios from 'axios';
 import './ProductList.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faHeart as regularHeart } from '@fortawesome/free-regular-svg-icons';
 import { faHeart as solidHeart } from '@fortawesome/free-solid-svg-icons';
 
-function ProductList({addToCart, updateCartQuantity, addToWishlist, cart, wishlist, setWishlist, searchTerm }) {
+function ProductList({ addToCart, updateCartQuantity, cart, wishlist, setWishlist, searchTerm }) {
   const [products, setProducts] = useState([]);
   const [minPrice, setMinPrice] = useState('');  
   const [maxPrice, setMaxPrice] = useState('');  
   const [currentPage, setCurrentPage] = useState(1);
   const productsPerPage = 6;
-  const removeFromWishlist = (id) => {
-    setWishlist(wishlist.filter(item => item.id !== id));
-  };
-  const [wishlistToggle, setWishlistToggle] = useState({});
 
   useEffect(() => {
-    setProducts(productData);
+    const fetchProducts = async () => {
+      try {
+        const response = await axios.get('/api/products');
+        console.log('Fetched products:', response.data);
+        setProducts(response.data);
+      } catch (error) {
+        console.error('Error fetching products:', error);
+      }
+    };
+    fetchProducts();
   }, []);
+
+  // Check if product is in wishlist
+  const isInWishlist = (productId) => {
+    return wishlist.some(item => item._id === productId);
+  };
+
+  const handleWishlistToggle = async (product) => {
+    if (isInWishlist(product._id)) {
+      // Remove from wishlist
+      try {
+        await axios.post('/api/wishlist/remove', { productId: product._id });
+        setWishlist(wishlist.filter(item => item._id !== product._id));
+      } catch (error) {
+        console.error('Error removing from wishlist:', error);
+      }
+    } else {
+      // Add to wishlist
+      try {
+        await axios.post('/api/wishlist/add', { productId: product._id });
+        setWishlist([...wishlist, product]);
+      } catch (error) {
+        console.error('Error adding to wishlist:', error);
+      }
+    }
+  };
+
   const handleMinPriceChange = (e) => {
     const value = e.target.value;
     setMinPrice(value === '' ? '' : Math.max(0, Number(value)));  
@@ -28,17 +59,6 @@ function ProductList({addToCart, updateCartQuantity, addToWishlist, cart, wishli
   const handleMaxPriceChange = (e) => {
     const value = e.target.value;
     setMaxPrice(value === '' ? '' : Math.max(0, Number(value)));  
-  };
-  const handleWishlistToggle = (product) => {
-    setWishlistToggle((prev) => ({
-      ...prev,
-      [product.id]: !prev[product.id]
-    }));
-    if (!wishlistToggle[product.id]) {
-      addToWishlist(product);
-    } else {
-      removeFromWishlist(product.id);
-    }
   };
 
   const filterBySearchTerm = (product) => {
@@ -52,8 +72,9 @@ function ProductList({addToCart, updateCartQuantity, addToWishlist, cart, wishli
   const indexOfLastProduct = currentPage * productsPerPage;
   const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
   const currentProducts = filteredProducts.slice(indexOfFirstProduct, indexOfLastProduct);
+  
   const isInCart = (productId) => {
-    return cart.find((item) => item.id === productId);
+    return cart.find((item) => item._id === productId);
   };
   const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
 
@@ -76,12 +97,12 @@ function ProductList({addToCart, updateCartQuantity, addToWishlist, cart, wishli
   };
 
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
-
   const goToPreviousPage = () => setCurrentPage(Math.max(1, currentPage - 1));
   const goToNextPage = () => setCurrentPage(Math.min(totalPages, currentPage + 1));
+
   return (
     <div className="product-page">
-    <div className="sidebar">
+      <div className="sidebar">
         <h3>Filter by Price</h3>
         <label>
           Min Price:
@@ -102,52 +123,43 @@ function ProductList({addToCart, updateCartQuantity, addToWishlist, cart, wishli
           />
         </label>
       </div>
-    <div className="main-content">
-      <h2>Products</h2>
-      
-      {currentProducts.length === 0 ? (
-        <p>No products available</p>
-      ) : (
-        <div className="product-grid">
-        {currentProducts.map(product => (
-          <div key={product.id} className="product-card">
-          <Link to={`/product/${product.id}`} key={product.id} className="product-link">
-
-            <img className='product-image'
-              src={product.image} 
-              alt={product.title} 
-            />
-          
-
-            <h3>{product.title}</h3>
-            <p>Price: ${product.price}</p>
-            </Link>
-            
-      <FontAwesomeIcon 
-        icon={wishlistToggle[product.id] ? solidHeart : regularHeart} 
-        size="2x" 
-        className={wishlistToggle[product.id] ? 'wishlist-heart active' : 'wishlist-heart'}
-        onClick={() => handleWishlistToggle(product)}
-      />
-      {isInCart(product.id) ? (
-        <div>
-          <button onClick={() => updateCartQuantity(product.id, -1)}>-</button>
-          <span>{isInCart(product.id).quantity}</span>
-          <button onClick={() => updateCartQuantity(product.id, 1)}>+</button>
-        </div>
-      ) : (
-        <button onClick={() => addToCart(product)}>Add to Cart</button>
-      )}
-            
+      <div className="main-content">
+        <h2>Products</h2>
+        
+        {currentProducts.length === 0 ? (
+          <p>No products available</p>
+        ) : (
+          <div className="product-grid">
+            {currentProducts.map(product => (
+              <div key={product._id} className="product-card">
+                <Link to={`/product/${product._id}`} className="product-link">
+                  <img className='product-image' src={product.image} alt={product.title} />
+                  <h3>{product.title}</h3>
+                  <p>Price: ${product.price}</p>
+                </Link>
+                <FontAwesomeIcon 
+                  icon={isInWishlist(product._id) ? solidHeart : regularHeart} 
+                  size="2x" 
+                  className={isInWishlist(product._id) ? 'wishlist-heart active' : 'wishlist-heart'}
+                  onClick={() => handleWishlistToggle(product)}
+                />
+                {isInCart(product._id) ? (
+                  <div>
+                    <button onClick={() => updateCartQuantity(product._id, -1)}>-</button>
+                    <span>{isInCart(product._id).quantity}</span>
+                    <button onClick={() => updateCartQuantity(product._id, 1)}>+</button>
+                  </div>
+                ) : (
+                  <button onClick={() => addToCart(product)}>Add to Cart</button>
+                )}
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
-    )}
-      <div className="pagination-container">
+        )}
+        <div className="pagination-container">
           <div className="current-page-info">
             <p>Page {currentPage} of {totalPages}</p>
           </div>
-
           <div className="pagination">
             <button onClick={goToPreviousPage} disabled={currentPage === 1}>
               Previous
@@ -169,10 +181,9 @@ function ProductList({addToCart, updateCartQuantity, addToWishlist, cart, wishli
             </button>
           </div>
         </div>
-    </div>
+      </div>
     </div>
   );
-
 }
 
 export default ProductList;
